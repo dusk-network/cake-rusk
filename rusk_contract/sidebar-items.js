@@ -1,1 +1,0 @@
-initSidebarItems({"attr":[["main","A macro for declaring the main entry point for a Rusk Contract. It needs to be specified after all the contract's methods."],["method","A macro for declaring methods callable for a Rusk Contract. It needs to have an `opcode` specified."]]});
