@@ -1,0 +1,14 @@
+[package]
+name = "cake-rusk"
+version = "0.0.1"
+authors = ["zer0 <matteo@dusk.network>"]
+edition = "2018"
+
+[dependencies]
+proc-macro2 = "1.0.10"
+quote = "1.0.3"
+syn = { version = "1.0.17", features = ["full", "extra-traits"] }
+lazy_static = "1.4.0"
+
+[lib]
+proc-macro = true
