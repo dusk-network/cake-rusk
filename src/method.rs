@@ -5,7 +5,7 @@ use crate::METHODS;
 
 /// A macro for declaring methods callable for a Rusk Contract.
 /// It needs to have an `opcode` specified.
-pub fn method(input: syn::ItemFn) -> TokenStream {
+pub fn method(input: syn::ItemFn) -> (TokenStream, TokenStream) {
   let name = &input.sig.ident;
   let ret = &input.sig.output;
   let body = &input.block;
@@ -33,7 +33,6 @@ pub fn method(input: syn::ItemFn) -> TokenStream {
     .collect();
 
   let struct_name = syn::Ident::new(&format!("{}_args", name), proc_macro2::Span::call_site());
-
   let struct_types: Vec<syn::Type> = inputs
     .iter()
     .filter_map(|i| match i {
@@ -61,8 +60,14 @@ pub fn method(input: syn::ItemFn) -> TokenStream {
     }
   };
 
+  let ret = if let syn::ReturnType::Type(_, ty) = ret {
+    quote! { #ty }
+  } else {
+    quote! {}
+  };
+
   let mut list = METHODS.lock().unwrap();
   list.push((name.to_string(), !struct_types.is_empty()));
 
-  result.into()
+  (result.into(), ret.into())
 }

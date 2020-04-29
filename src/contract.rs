@@ -9,6 +9,8 @@ use crate::METHODS;
 /// It needs to have an `opcode` specified.
 pub fn contract(attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut result: Vec<proc_macro2::TokenStream> = vec![];
+    let mut returns: Vec<proc_macro2::TokenStream> = vec![];
+
     let input = syn::parse_macro_input!(item as syn::ItemMod);
     let ident = &input.ident;
 
@@ -46,7 +48,9 @@ pub fn contract(attr: TokenStream, item: TokenStream) -> TokenStream {
             syn::Item::Fn(item_fn) => {
                 let vis = &item_fn.vis;
                 if let syn::Visibility::Public(_) = vis {
-                    result.push(method(item_fn.clone()).into());
+                    let (res, ret) = method(item_fn.clone());
+                    result.push(res.into());
+                    returns.push(ret.into());
                 }
             }
             i => result.push(i.to_token_stream()),
@@ -77,12 +81,12 @@ pub fn contract(attr: TokenStream, item: TokenStream) -> TokenStream {
         }
 
         #[no_mangle]
-        pub fn call() -> i32 {
+        pub fn call() {
             let code: u8 = dusk_abi::opcode::<u8>();
-            dusk_abi::ret::<i32>(match code {
-                #( #keys => #ident::#values, ) *
+            match code {
+                #(#keys =>  dusk_abi::ret::<#returns>(#ident::#values), ) *
                 _ => 0,
-            });
+            };
         }
     })
     .into()
